@@ -1611,13 +1611,14 @@ class Repository(github.GithubObject.CompletableGithubObject):
         )
         return github.Branch.Branch(self._requester, headers, data, completed=True)
 
-    def get_branches(self):
+    def get_branches(self, page_limit=None):
         """
         :calls: `GET /repos/:owner/:repo/branches <http://developer.github.com/v3/repos>`_
+        :param page_limit: integer
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Branch.Branch`
         """
         return github.PaginatedList.PaginatedList(
-            github.Branch.Branch, self._requester, self.url + "/branches", None
+            github.Branch.Branch, self._requester, self.url + "/branches", None, page_limit=page_limit
         )
 
     def get_collaborators(self, affiliation=github.GithubObject.NotSet):
@@ -1688,6 +1689,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
         since=github.GithubObject.NotSet,
         until=github.GithubObject.NotSet,
         author=github.GithubObject.NotSet,
+		page_limit=None
     ):
         """
         :calls: `GET /repos/:owner/:repo/commits <http://developer.github.com/v3/repos/commits>`_
@@ -1696,6 +1698,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
         :param since: datetime.datetime
         :param until: datetime.datetime
         :param author: string or :class:`github.NamedUser.NamedUser` or :class:`github.AuthenticatedUser.AuthenticatedUser`
+        :param page_limit: integer
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Commit.Commit`
         """
         assert sha is github.GithubObject.NotSet or isinstance(sha, str), sha
@@ -1735,7 +1738,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
             else:
                 url_parameters["author"] = author
         return github.PaginatedList.PaginatedList(
-            github.Commit.Commit, self._requester, self.url + "/commits", url_parameters
+            github.Commit.Commit, self._requester, self.url + "/commits", url_parameters, page_limit=page_limit
         )
 
     def get_contents(self, path, ref=github.GithubObject.NotSet):
@@ -2418,6 +2421,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
         direction=github.GithubObject.NotSet,
         since=github.GithubObject.NotSet,
         creator=github.GithubObject.NotSet,
+		page_limit=None
     ):
         """
         :calls: `GET /repos/:owner/:repo/issues <http://developer.github.com/v3/issues>`_
@@ -2430,6 +2434,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
         :param direction: string
         :param since: datetime.datetime
         :param creator: string or :class:`github.NamedUser.NamedUser`
+        :param page_limit: integer
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.Issue.Issue`
         """
         assert (
@@ -2497,7 +2502,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
             else:
                 url_parameters["creator"] = creator._identity
         return github.PaginatedList.PaginatedList(
-            github.Issue.Issue, self._requester, self.url + "/issues", url_parameters
+            github.Issue.Issue, self._requester, self.url + "/issues", url_parameters, page_limit=page_limit
         )
 
     def get_issues_comments(
@@ -2505,12 +2510,14 @@ class Repository(github.GithubObject.CompletableGithubObject):
         sort=github.GithubObject.NotSet,
         direction=github.GithubObject.NotSet,
         since=github.GithubObject.NotSet,
+		page_limit=None
     ):
         """
         :calls: `GET /repos/:owner/:repo/issues/comments <http://developer.github.com/v3/issues/comments>`_
         :param sort: string
         :param direction: string
         :param since: datetime.datetime
+        :param page_limit: integer
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.IssueComment.IssueComment`
         """
         assert sort is github.GithubObject.NotSet or isinstance(sort, str), sort
@@ -2532,6 +2539,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
             self._requester,
             self.url + "/issues/comments",
             url_parameters,
+			page_limit=page_limit
         )
 
     def get_issues_event(self, id):
@@ -2712,6 +2720,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
         direction=github.GithubObject.NotSet,
         base=github.GithubObject.NotSet,
         head=github.GithubObject.NotSet,
+		page_limit=None
     ):
         """
         :calls: `GET /repos/:owner/:repo/pulls <http://developer.github.com/v3/pulls>`_
@@ -2720,6 +2729,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
         :param direction: string
         :param base: string
         :param head: string
+        :param page_limit: integer
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.PullRequest.PullRequest`
         """
         assert state is github.GithubObject.NotSet or isinstance(state, str), state
@@ -2745,6 +2755,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
             self._requester,
             self.url + "/pulls",
             url_parameters,
+            page_limit=page_limit
         )
 
     def get_pulls_comments(
@@ -2752,27 +2763,31 @@ class Repository(github.GithubObject.CompletableGithubObject):
         sort=github.GithubObject.NotSet,
         direction=github.GithubObject.NotSet,
         since=github.GithubObject.NotSet,
+		page_limit=None
     ):
         """
         :calls: `GET /repos/:owner/:repo/pulls/comments <http://developer.github.com/v3/pulls/comments>`_
         :param sort: string
         :param direction: string
         :param since: datetime.datetime
+        :param page_limit: integer
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.PullRequestComment.PullRequestComment`
         """
-        return self.get_pulls_review_comments(sort, direction, since)
+        return self.get_pulls_review_comments(sort, direction, since, page_limit=None)
 
     def get_pulls_review_comments(
         self,
         sort=github.GithubObject.NotSet,
         direction=github.GithubObject.NotSet,
         since=github.GithubObject.NotSet,
+		page_limit=None
     ):
         """
         :calls: `GET /repos/:owner/:repo/pulls/comments <http://developer.github.com/v3/pulls/comments>`_
         :param sort: string
         :param direction: string
         :param since: datetime.datetime
+        :param page_limit: integer
         :rtype: :class:`github.PaginatedList.PaginatedList` of :class:`github.PullRequestComment.PullRequestComment`
         """
         assert sort is github.GithubObject.NotSet or isinstance(sort, str), sort
@@ -2794,6 +2809,7 @@ class Repository(github.GithubObject.CompletableGithubObject):
             self._requester,
             self.url + "/pulls/comments",
             url_parameters,
+			page_limit=page_limit
         )
 
     def get_readme(self, ref=github.GithubObject.NotSet):
